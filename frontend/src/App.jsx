@@ -6,6 +6,9 @@ import RegisterForm from "./components/RegisterForm";
 import ProtectedRoute from "./auth/ProtectedRoutes";
 import Unauthorized from "./pages/Unauthorized";
 import Layout from "./components/layout";
+import Events from "./pages/Events";
+import EventDetails from "./pages/EventDetails";
+
 function App() {
   return (
     <BrowserRouter>
@@ -26,6 +29,9 @@ function App() {
           >
             {/* Index Route */}
             <Route index element={<Dashboard />} />
+            {/* Events Routes */}
+            <Route path="events" element={<Events />} />
+            <Route path="events/:id" element={<EventDetails />} />
           </Route>
 
           {/* Wildcard Route */}

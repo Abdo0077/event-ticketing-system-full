@@ -10,6 +10,7 @@ export default function Layout() {
         <h1 className="text-lg font-semibold">Portal Dashboard</h1>
         <nav className="space-x-8">
           <Link to="/">Home</Link>
+          <Link to="/events">Events</Link>
           {user?.role === "admin" && <Link to="/users">Users</Link>}
           {user?.role === "admin" && <Link to="/courses">Courses</Link>}
           {user?.role === "student" && <Link to="/my-courses">My Courses</Link>}

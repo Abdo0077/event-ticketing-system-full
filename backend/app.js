@@ -34,7 +34,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/events", eventRouter);
 app.use("/api/v1/bookings", bookingRouter);
 
-const db_name = "Bookings";
+const db_name = "eventmanagement";
 const db_url = `mongodb://localhost:27017/${db_name}`; 
 
 const connectionOptions = {

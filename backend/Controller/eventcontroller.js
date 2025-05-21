@@ -17,7 +17,7 @@ exports.createEvent = async (req, res) => {
 // Get all approved events (Public)
 exports.getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find({ status: 'approved' });
+    const events = await Event.find();
     res.json(events);
   } catch (err) {
     res.status(500).json({ message: err.message });
