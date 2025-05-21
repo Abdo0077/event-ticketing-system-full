@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser())
 app.use(
     cors({
-      origin: process.env.ORIGIN,
+      origin: "http://localhost:5173",
       methods: ["GET", "POST", "DELETE", "PUT"],
       credentials: true,
     })
@@ -49,7 +49,7 @@ const connectionOptions = {
       console.log(e);
     });
   
-  app.use(function (req, res, next) {
+  app.use((req, res) => {
     return res.status(404).send("404");
   });
   app.listen(3000, () => console.log("server started"));
