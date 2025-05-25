@@ -36,7 +36,7 @@ const ChangePasswordForm = ({ onClose, onSuccess }) => {
       ...prev,
       [name]: value
     }));
-    // Clear error when user starts typing
+    // Clear error when user starts typing (this is a hack to make the error go away when user starts typing)
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -70,7 +70,7 @@ const ChangePasswordForm = ({ onClose, onSuccess }) => {
     } catch (err) {
       console.error('Change password error:', err);
       setSubmitError(
-        err.response?.data?.message || 
+        err.response?.data?.message ||
         'An error occurred while changing password. Please try again.'
       );
     } finally {
