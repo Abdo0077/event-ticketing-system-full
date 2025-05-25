@@ -8,6 +8,8 @@ import Unauthorized from "./pages/Unauthorized";
 import Layout from "./components/layout";
 import Profile from "./pages/Profile";
 import AdminUsersPage from "./pages/AdminUsersPage";
+import EventList from "./components/EventList";
+import EventDetails from "./components/EventDetails";
 
 function App() {
   return (
@@ -28,10 +30,14 @@ function App() {
             }
           >
             {/* Index Route */}
-            <Route index element={<Dashboard />} />
+            <Route index element={<EventList />} />
+            {/* Dashboard Route */}
+            <Route path="dashboard" element={<Dashboard />} />
             {/* Profile Route */}
             <Route path="profile" element={<Profile />} />
-            
+            {/* Event Details Route */}
+            <Route path="events/:eventId" element={<EventDetails />} />
+
             {/* Admin Routes */}
             <Route path="admin">
               <Route
