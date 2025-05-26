@@ -10,10 +10,7 @@ export default function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const success = await login(form);
-    if (success) {
-      localStorage.setItem('userEmail', form.email);
-      navigate("/");
-    }
+    if (success) navigate("/");
   };
 
   return (

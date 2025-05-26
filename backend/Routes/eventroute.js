@@ -8,13 +8,15 @@ router.get('/', eventController.getAllEvents);
 router.get('/:id', eventController.getEventById);
 
 // Organizer
-router.post('/', authorizationMiddleware('Organizer'), eventController.createEvent);
+router.post('/',authorizationMiddleware('Organizer'), eventController.createEvent);
 router.put('/:id', authorizationMiddleware(['Organizer', 'System Admin']), eventController.updateEvent);
 router.delete('/:id', authorizationMiddleware(['Organizer', 'System Admin']), eventController.deleteEvent);
-router.get('/users/my-events', authorizationMiddleware('Organizer'), eventController.getMyEvents);
-router.get('/users/analytics', authorizationMiddleware('Organizer'), eventController.getMyEventAnalytics);
+router.get('/organizer/my-events', authorizationMiddleware('Organizer'), eventController.getMyEvents);
+router.get('/organizer/analytics', authorizationMiddleware('Organizer'), eventController.getMyEventAnalytics);
 
 // Admin
 router.put('/:id/status', authorizationMiddleware('System Admin'), eventController.updateEventStatus);
+router.put('/:id/approve', authorizationMiddleware('System Admin'), eventController.approveEvent);
+router.put('/:id/disapprove', authorizationMiddleware('System Admin'), eventController.disapproveEvent);
 
 module.exports = router;

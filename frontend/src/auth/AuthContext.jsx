@@ -4,10 +4,8 @@ import axios from "axios";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(null);
-
   // Fetch current user on app load
   useEffect(() => {
     const fetchUser = async () => {
@@ -15,18 +13,10 @@ export const AuthProvider = ({ children }) => {
         const res = await axios.get("http://localhost:3000/api/v1/users/profile", {
           withCredentials: true,
         });
-        if (res.data.success && res.data.user) {
-          setUser(res.data.user);
-          // The token is handled by cookies, so we'll set a flag to indicate authentication
-          setToken('authenticated');
-        } else {
-          setUser(null);
-          setToken(null);
-        }
+        setUser(res.data); // The response is now just the user object
       } catch(e) {
-        console.log('Auth check error:', e);
+        console.log(e);
         setUser(null);
-        setToken(null);
       } finally {
         setLoading(false);
       }
@@ -35,22 +25,19 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Login function
-  const login = async (credentials) => {
+const login = async (credentials) => {
     try {
-      const response = await axios.post("http://localhost:3000/api/v1/login", credentials, {
+      const response = await axios.post("http://localhost:3000/api/v1/auth/login", credentials, {
         withCredentials: true,
       });
-      
-      if (response.data && response.data.user) {
+      if (response.data) {
         setUser(response.data.user);
-        setToken('authenticated');
         return true;
       }
-      throw new Error(response.data?.message || 'Login failed');
+      throw new Error(response.message);
     } catch (err) {
-      console.error('Login error:', err);
-      setToken(null);
-      throw err;
+      console.error(err);
+      throw err; // Re-throw the error so it can be handled by the login form
     }
   };
 
@@ -58,24 +45,23 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await axios.post(
-        "http://localhost:3000/api/v1/logout",
+        "http://localhost:3000/api/v1/auth/logout",
         {},
         {
           withCredentials: true,
         }
       );
-    } catch (err) {
-      console.error('Logout error:', err);
-    } finally {
       setUser(null);
-      setToken(null);
+    } catch (err) {
+      console.error(err);
+      throw err;
     }
   };
 
   if (loading) return <div>Loading...</div>;
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

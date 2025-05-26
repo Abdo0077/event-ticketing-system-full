@@ -6,17 +6,12 @@ import RegisterForm from "./components/RegisterForm";
 import ProtectedRoute from "./auth/ProtectedRoutes";
 import Unauthorized from "./pages/Unauthorized";
 import Layout from "./components/layout";
-import Profile from "./pages/Profile";
-import AdminUsersPage from "./pages/AdminUsersPage";
-import EventList from "./components/EventList";
-import EventDetails from "./components/EventDetails";
-import Booking from "./pages/Booking";
-import BookingSuccess from "./pages/BookingSuccess";
-import MyBookings from "./pages/MyBookings";
-import MyEvents from "./pages/MyEvents";
-import EditEvent from "./pages/EditEvent";
+import Events from "./pages/Events";
+import EventDetails from "./pages/EventDetails";
 import CreateEvent from "./pages/CreateEvent";
+import MyEventsPage from "./pages/MyEventsPage";
 import EventAnalytics from "./pages/EventAnalytics";
+import AdminEventsPage from "./pages/AdminEventsPage";
 
 function App() {
   return (
@@ -37,52 +32,31 @@ function App() {
             }
           >
             {/* Index Route */}
-            <Route index element={<EventList />} />
-            {/* Dashboard Route */}
-            <Route path="dashboard" element={<Dashboard />} />
-            {/* Profile Route */}
-            <Route path="profile" element={<Profile />} />
-            {/* Event Details Route */}
-            <Route path="events/:eventId" element={<EventDetails />} />
-            {/* Booking Routes */}
-            <Route path="booking/:eventId" element={<Booking />} />
-            <Route path="booking-success" element={<BookingSuccess />} />
-            {/* My Bookings Route */}
-            <Route path="my-bookings" element={<MyBookings />} />
-
-            {/* My Events Route - Only for Organizers */}
+            <Route index element={<Dashboard />} />
+            
+            {/* Events Routes */}
+            <Route path="events" element={<Events />} />
+            <Route path="events/:id" element={<EventDetails />} />
+            
+            {/* Organizer Routes */}
             <Route
-              path="my-events"
-              element={
-                <ProtectedRoute allowedRoles={["Organizer"]}>
-                  <MyEvents />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Create Event Route - Only for Organizers */}
-            <Route
-              path="create-event"
+              path="events/create"
               element={
                 <ProtectedRoute allowedRoles={["Organizer"]}>
                   <CreateEvent />
                 </ProtectedRoute>
               }
             />
-
-            {/* Edit Event Route - Only for Organizers */}
             <Route
-              path="edit-event/:eventId"
+              path="my-events"
               element={
                 <ProtectedRoute allowedRoles={["Organizer"]}>
-                  <EditEvent />
+                  <MyEventsPage />
                 </ProtectedRoute>
               }
             />
-
-            {/* Event Analytics Route - Only for Organizers */}
             <Route
-              path="event-analytics/:eventId"
+              path="analytics"
               element={
                 <ProtectedRoute allowedRoles={["Organizer"]}>
                   <EventAnalytics />
@@ -91,16 +65,14 @@ function App() {
             />
 
             {/* Admin Routes */}
-            <Route path="admin">
-              <Route
-                path="users"
-                element={
-                  <ProtectedRoute allowedRoles={["System Admin"]}>
-                    <AdminUsersPage />
-                  </ProtectedRoute>
-                }
-              />
-            </Route>
+            <Route
+              path="manage-events"
+              element={
+                <ProtectedRoute allowedRoles={["System Admin"]}>
+                  <AdminEventsPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* Wildcard Route */}
