@@ -60,123 +60,169 @@ const AdminEventsPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="sm:flex sm:items-center sm:justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Manage Events</h1>
-        <div className="mt-4 sm:mt-0">
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          >
-            <option value="all">All Events</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="declined">Declined</option>
-          </select>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Event Management</h1>
+        <p className="mt-2 text-gray-600">Review and manage upcoming events</p>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
-          {error}
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600">{error}</p>
         </div>
       )}
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      <div className="mb-6 flex gap-2">
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-4 py-2 rounded-md ${
+            filter === 'all'
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          All Events
+        </button>
+        <button
+          onClick={() => setFilter('pending')}
+          className={`px-4 py-2 rounded-md ${
+            filter === 'pending'
+              ? 'bg-yellow-500 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          Pending
+        </button>
+        <button
+          onClick={() => setFilter('approved')}
+          className={`px-4 py-2 rounded-md ${
+            filter === 'approved'
+              ? 'bg-green-500 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          Approved
+        </button>
+        <button
+          onClick={() => setFilter('declined')}
+          className={`px-4 py-2 rounded-md ${
+            filter === 'declined'
+              ? 'bg-red-500 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          Declined
+        </button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Event Details
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Organizer
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date & Location
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filteredEvents.length === 0 ? (
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Event
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Organizer
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                  No events found matching the selected filter.
+                </td>
               </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredEvents.map((event) => (
+            ) : (
+              filteredEvents.map((event) => (
                 <tr key={event._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4">
                     <div className="flex items-center">
                       {event.image && (
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <img
-                            className="h-10 w-10 rounded-full object-cover"
-                            src={event.image}
-                            alt={event.title}
-                          />
-                        </div>
+                        <img
+                          src={event.image}
+                          alt=""
+                          className="h-10 w-10 rounded-md object-cover mr-3"
+                        />
                       )}
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {event.title}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {event.location}
+                      <div>
+                        <div className="font-medium text-gray-900">{event.title}</div>
+                        <div className="text-sm text-gray-500 truncate max-w-md">
+                          {event.description}
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{event.organizer.name}</div>
-                    <div className="text-sm text-gray-500">{event.organizer.email}</div>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-900">
+                      {event.organizer?.name || 'Unknown Organizer'}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(event.date)}
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-900">{formatDate(event.date)}</div>
+                    <div className="text-sm text-gray-500">{event.location}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      event.status === 'approved'
-                        ? 'bg-green-100 text-green-800'
-                        : event.status === 'declined'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                  <td className="px-6 py-4">
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        event.status === 'approved'
+                          ? 'bg-green-100 text-green-800'
+                          : event.status === 'declined'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}
+                    >
+                      {event.status?.charAt(0).toUpperCase() + event.status?.slice(1)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="px-6 py-4">
                     {event.status === 'pending' && (
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleStatusChange(event._id, 'approved')}
-                          className="text-green-600 hover:text-green-900"
+                          className="px-3 py-1 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors"
                         >
                           Approve
                         </button>
                         <button
                           onClick={() => handleStatusChange(event._id, 'declined')}
-                          className="text-red-600 hover:text-red-900"
+                          className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition-colors"
                         >
                           Decline
                         </button>
                       </div>
                     )}
-                    {event.status !== 'pending' && (
+                    {event.status === 'approved' && (
                       <button
-                        onClick={() => handleStatusChange(event._id, 'pending')}
-                        className="text-blue-600 hover:text-blue-900"
+                        onClick={() => handleStatusChange(event._id, 'declined')}
+                        className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition-colors"
                       >
-                        Reset Status
+                        Decline
+                      </button>
+                    )}
+                    {event.status === 'declined' && (
+                      <button
+                        onClick={() => handleStatusChange(event._id, 'approved')}
+                        className="px-3 py-1 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors"
+                      >
+                        Approve
                       </button>
                     )}
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
