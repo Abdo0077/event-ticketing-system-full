@@ -16,6 +16,7 @@ import MyBookings from "./pages/MyBookings";
 import MyEvents from "./pages/MyEvents";
 import EditEvent from "./pages/EditEvent";
 import CreateEvent from "./pages/CreateEvent";
+import EventAnalytics from "./pages/EventAnalytics";
 
 function App() {
   return (
@@ -75,6 +76,16 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["Organizer"]}>
                   <EditEvent />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Event Analytics Route - Only for Organizers */}
+            <Route
+              path="event-analytics/:eventId"
+              element={
+                <ProtectedRoute allowedRoles={["Organizer"]}>
+                  <EventAnalytics />
                 </ProtectedRoute>
               }
             />
