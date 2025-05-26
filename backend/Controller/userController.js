@@ -2,6 +2,7 @@ const userModel = require("../Model/UserSchema");
 const jwt = require("jsonwebtoken");
 const secretKey = "123456";
 const bcrypt = require("bcrypt");
+const Event = require("../Model/EventSchema");
 
 const userController = {
     register: async (req, res) => {
@@ -75,6 +76,19 @@ const userController = {
             res.status(500).json({ message: "Server error" });
           }
     },
+    logout: async (req, res) => {
+        try {
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none'
+            });
+            return res.status(200).json({ message: "Logged out successfully" });
+        } catch (error) {
+            console.error("Error logging out:", error);
+            res.status(500).json({ message: "Server error" });
+        }
+    },
     getAllUsers: async (req, res) => {
       try {
         const users = await userModel.find();
@@ -119,23 +133,20 @@ const userController = {
       }
     },
 
- //Get current user’s profile 
+ //Get current user's profile 
      getUserProfile : async (req, res) => {
   try {
     // Get user ID from req.user 
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     // Fetch the user from the DB (excluding password)
-    const user = await User.findById(userId).select("-password");
+    const user = await userModel.findById(userId).select("-password");
 
-    if (!user) {     // (if token is still available but user is deleted from db)
+    if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    res.status(200).json({
-      success: true,
-      user,
-    });
+    res.status(200).json(user);
   } catch (error) {
     console.error("Error fetching profile:", error);
     res.status(500).json({ message: "Server error." });
@@ -144,7 +155,7 @@ const userController = {
 
 
 
-//Update current user’s profile 
+//Update current user's profile 
 updateUserProfile : async (req, res) => {
   try {
     const userId = req.user.id;
@@ -208,7 +219,7 @@ getSingleUser: async (req, res) => {
 },
 
 
-//Update user’s role 
+//Update user's role 
 updateUserRole : async (req, res) => {
   try {
     const userId = req.params.id;
@@ -282,7 +293,7 @@ deleteUser : async (req, res) => {
 
 
 
-//Get current user’s bookings 
+//Get current user's bookings 
 getCurrentBookings : async (req, res) => {
   try {
     const userId = req.user.id; // The user ID comes from the authenticated user (from JWT token or session)
@@ -308,7 +319,7 @@ getCurrentBookings : async (req, res) => {
 
 
 
-//Get current user’s events 
+//Get current user's events 
 getMyEvents : async (req, res) => {
   try {
     const organizerId = req.user.id;
@@ -332,7 +343,7 @@ getMyEvents : async (req, res) => {
 
 
 
-//Get the analytics of the current user’s events 
+//Get the analytics of the current user's events 
 getMyEventAnalytics : async (req, res) => {
   try {
     const organizerId = req.user.id;
@@ -367,9 +378,47 @@ getMyEventAnalytics : async (req, res) => {
     console.error("Error getting event analytics:", error);
     res.status(500).json({ message: "Server error." });
   }
+},
+
+// Approve/Decline event (Admin only)
+updateEventStatus: async (req, res) => {
+  try {
+    if (req.user.role !== 'System Admin') {
+      return res.status(403).json({ message: 'Only System Admin can update event status' });
+    }
+
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    const { status } = req.body;
+    if (!['approved', 'declined', 'pending'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
+
+    if (status === 'declined') {
+      await event.deleteOne();
+      return res.status(200).json({ 
+        message: 'Event declined and deleted', 
+        deleted: true, 
+        eventId: event._id 
+      });
+    }
+
+    event.status = status;
+    await event.save();
+
+    return res.status(200).json({ 
+      message: `Event ${status} successfully`, 
+      event,
+      status: status 
+    });
+  } catch (error) {
+    console.error('Error updating event status:', error);
+    res.status(500).json({ message: 'Server error while updating event status' });
+  }
 }
-
-
 };
 
 module.exports = userController;

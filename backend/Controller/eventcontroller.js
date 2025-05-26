@@ -1,11 +1,55 @@
 const Event = require('../Model/EventSchema');
+
+/**
+ * Public Event Operations
+ */
+
+// Get all events (Public/Admin)
+exports.getAllEvents = async (req, res) => {
+  try {
+    let query = {};
+    
+    // If user is not an admin, only show approved events
+    if (req.user.role !== 'System Admin') {
+      query.status = 'approved';
+    }
+
+    const events = await Event.find(query).populate('organizer', 'name');
+    res.json(events);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Get single event by ID (Public/Admin)
+exports.getEventById = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id).populate('organizer', 'name');
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+
+    // If user is not an admin and event is not approved, don't show it
+    if (req.user.role !== 'System Admin' && event.status !== 'approved') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    res.json(event);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * Organizer Event Operations
+ */
+
 // Create a new event (Organizer only)
 exports.createEvent = async (req, res) => {
   try {
     const event = new Event({
       ...req.body,
       organizer: req.user.userId,
-      remainingTickets: req.body.totalTickets
+      remainingTickets: req.body.totalTickets,
+      status: 'pending' // Explicitly set status to pending
     });
     await event.save();
     res.status(201).json(event);
@@ -14,22 +58,26 @@ exports.createEvent = async (req, res) => {
   }
 };
 
-// Get all approved events (Public)
-exports.getAllEvents = async (req, res) => {
+// Get organizer's events
+exports.getMyEvents = async (req, res) => {
   try {
-    const events = await Event.find();
+    const events = await Event.find({ organizer: req.user.userId });
     res.json(events);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// Get single event by ID (Public)
-exports.getEventById = async (req, res) => {
+// Get organizer's event analytics
+exports.getMyEventAnalytics = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ message: 'Event not found' });
-    res.json(event);
+    const events = await Event.find({ organizer: req.user.userId });
+    const analytics = events.map(event => ({
+      title: event.title,
+      status: event.status,
+      percentageBooked: ((event.totalTickets - event.remainingTickets) / event.totalTickets * 100).toFixed(2)
+    }));
+    res.json(analytics);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -42,7 +90,7 @@ exports.updateEvent = async (req, res) => {
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
     // Only organizer or admin can update
-    if (String(event.organizer) !== req.user._id && req.user.role !== 'admin') {
+    if (String(event.organizer) !== req.user.userId && req.user.role !== 'System Admin') {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
@@ -52,7 +100,7 @@ exports.updateEvent = async (req, res) => {
     });
 
     if (req.body.totalTickets !== undefined) {
-      event.remainingTickets = req.body.totalTickets; // You can handle logic here for adjusting existing bookings
+      event.remainingTickets = req.body.totalTickets;
     }
 
     await event.save();
@@ -68,7 +116,7 @@ exports.deleteEvent = async (req, res) => {
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
-    if (String(event.organizer) !== req.user._id && req.user.role !== 'admin') {
+    if (String(event.organizer) !== req.user.userId && req.user.role !== 'System Admin') {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
@@ -79,44 +127,51 @@ exports.deleteEvent = async (req, res) => {
   }
 };
 
-// Approve/Decline event (Admin only)
+/**
+ * Admin Event Operations
+ */
+
+// Update event status (Admin only)
 exports.updateEventStatus = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
-
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
-    event.status = req.body.status;
-    await event.save();
+    const { status } = req.body;
+    if (!['approved', 'declined', 'pending'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
 
-    res.json({ message: `Event ${event.status}`, event });
+    if (status === 'declined') {
+      await event.deleteOne();
+      return res.json({ message: 'Event declined and deleted', deleted: true, eventId: event._id });
+    } else {
+      event.status = status;
+      await event.save();
+      return res.json({ message: `Event ${status} successfully`, event, status: status });
+    }
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
-// Organizer: Get their own events
-exports.getMyEvents = async (req, res) => {
+// Approve an event (Admin only)
+exports.approveEvent = async (req, res) => {
   try {
-    const events = await Event.find({ organizer: req.user._id });
-    res.json(events);
+    const event = await Event.findByIdAndUpdate(req.params.id, { status: 'approved' }, { new: true });
+    if (!event) return res.status(404).json({ message: "Event not found" });
+    res.status(200).json({ message: "Event approved", event });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// Organizer: Analytics
-exports.getMyEventAnalytics = async (req, res) => {
+// Disapprove (delete) an event (Admin only)
+exports.disapproveEvent = async (req, res) => {
   try {
-    const events = await Event.find({ organizer: req.user._id });
-
-    const analytics = events.map(event => ({
-      title: event.title,
-      percentageBooked: ((event.totalTickets - event.remainingTickets) / event.totalTickets * 100).toFixed(2)
-    }));
-
-    res.json(analytics);
+    const event = await Event.findByIdAndDelete(req.params.id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+    res.status(200).json({ message: "Event deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

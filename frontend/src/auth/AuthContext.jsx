@@ -13,9 +13,9 @@ export const AuthProvider = ({ children }) => {
         const res = await axios.get("http://localhost:3000/api/v1/users/profile", {
           withCredentials: true,
         });
-        setUser(res.data);
+        setUser(res.data); // The response is now just the user object
       } catch(e) {
-        console.log(e)
+        console.log(e);
         setUser(null);
       } finally {
         setLoading(false);

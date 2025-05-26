@@ -16,5 +16,7 @@ router.get('/organizer/analytics', authorizationMiddleware('Organizer'), eventCo
 
 // Admin
 router.put('/:id/status', authorizationMiddleware('System Admin'), eventController.updateEventStatus);
+router.put('/:id/approve', authorizationMiddleware('System Admin'), eventController.approveEvent);
+router.put('/:id/disapprove', authorizationMiddleware('System Admin'), eventController.disapproveEvent);
 
 module.exports = router;

@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { eventService } from '../services/eventService';
+import { useAuth } from '../auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const AdminEventsPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect non-admins away immediately
+  useEffect(() => {
+    if (!user || user.role !== 'System Admin') {
+      navigate('/'); // Redirect to home or another safe page
+    }
+  }, [user, navigate]);
+
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [eventNotes, setEventNotes] = useState({});
 
   useEffect(() => {
     fetchEvents();
@@ -24,12 +37,47 @@ const AdminEventsPage = () => {
   };
 
   const handleStatusChange = async (eventId, status) => {
+    const note = eventNotes[eventId] || '';
+    console.log(`Event ${eventId} status: ${status}, note: ${note}`);
     try {
-      await eventService.updateEventStatus(eventId, status);
-      fetchEvents(); // Refresh the list
+      let result;
+      if (status === 'approved') {
+        result = await eventService.approveEvent(eventId);
+      } else if (status === 'declined') {
+        result = await eventService.disapproveEvent(eventId);
+      } else {
+        result = await eventService.updateEventStatus(eventId, status);
+      }
+
+      if (result.event) {
+        if (result.event.status === 'declined') {
+          setEvents(prevEvents => prevEvents.filter(event => event._id !== eventId));
+        } else {
+          setEvents(prevEvents => prevEvents.map(event =>
+            event._id === eventId ? { ...event, status: result.event.status } : event
+          ));
+        }
+        setError(null); // Clear any previous errors
+      } else if (result.deleted) {
+        setEvents(prevEvents => prevEvents.filter(event => event._id !== eventId));
+        setError(null);
+      } else {
+        setError('Failed to update event status: Invalid response from server');
+      }
     } catch (err) {
-      setError('Failed to update event status. Please try again.');
+      if (err.status === 403 || err.message?.toLowerCase().includes('unauthorized')) {
+        setError('You are not authorized to perform this action. Please log in as a System Admin.');
+      } else {
+        setError(err.message || 'Failed to update event status. Please try again.');
+      }
     }
+  };
+
+  const handleNoteChange = (eventId, value) => {
+    setEventNotes(prev => ({
+      ...prev,
+      [eventId]: value
+    }));
   };
 
   const formatDate = (dateString) => {
@@ -46,6 +94,93 @@ const AdminEventsPage = () => {
     if (filter === 'all') return true;
     return event.status === filter;
   });
+
+  const renderActionButtons = (event) => {
+    if (user?.role !== 'System Admin') return null;
+
+    const manageButton = (
+      <button
+        onClick={() => navigate(`/manage-events/${event._id}`)}
+        className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md transition-colors border border-black"
+      >
+        Manage
+      </button>
+    );
+
+    // Input for note
+    const noteInput = (
+      <input
+        type="text"
+        placeholder="Type approved or disapproved..."
+        value={eventNotes[event._id] || ''}
+        onChange={e => handleNoteChange(event._id, e.target.value)}
+        className="px-2 py-1 border rounded-md text-sm mr-2"
+        style={{ minWidth: 180 }}
+      />
+    );
+
+    if (event.status === 'pending') {
+      return (
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleStatusChange(event._id, 'approved')}
+              className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md transition-colors border border-black"
+            >
+              Accept
+            </button>
+            <button
+              onClick={() => handleStatusChange(event._id, 'declined')}
+              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md transition-colors border border-black"
+            >
+              Decline
+            </button>
+            {manageButton}
+          </div>
+          {noteInput}
+        </div>
+      );
+    }
+
+    if (event.status === 'approved') {
+      return (
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <span className="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded-md">
+              Approved
+            </span>
+            <button
+              onClick={() => handleStatusChange(event._id, 'declined')}
+              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md transition-colors border border-black"
+            >
+              Decline
+            </button>
+            {manageButton}
+          </div>
+          {noteInput}
+        </div>
+      );
+    }
+
+    if (event.status === 'declined') {
+      return (
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleStatusChange(event._id, 'approved')}
+              className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md transition-colors border border-black"
+            >
+              Approve
+            </button>
+            {manageButton}
+          </div>
+          {noteInput}
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   if (loading) {
     return (
@@ -185,38 +320,7 @@ const AdminEventsPage = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    {event.status === 'pending' && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleStatusChange(event._id, 'approved')}
-                          className="px-3 py-1 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleStatusChange(event._id, 'declined')}
-                          className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition-colors"
-                        >
-                          Decline
-                        </button>
-                      </div>
-                    )}
-                    {event.status === 'approved' && (
-                      <button
-                        onClick={() => handleStatusChange(event._id, 'declined')}
-                        className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition-colors"
-                      >
-                        Decline
-                      </button>
-                    )}
-                    {event.status === 'declined' && (
-                      <button
-                        onClick={() => handleStatusChange(event._id, 'approved')}
-                        className="px-3 py-1 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors"
-                      >
-                        Approve
-                      </button>
-                    )}
+                    {renderActionButtons(event)}
                   </td>
                 </tr>
               ))

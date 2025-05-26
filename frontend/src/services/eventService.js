@@ -69,6 +69,27 @@ export const eventService = {
       const response = await api.put(`/events/${id}/status`, { status });
       return response.data;
     } catch (error) {
+      console.error('Error updating event status:', error);
+      throw error.response?.data || error.message;
+    }
+  },
+
+  approveEvent: async (id) => {
+    try {
+      const response = await api.put(`/events/${id}/approve`);
+      return response.data;
+    } catch (error) {
+      console.error('Error approving event:', error);
+      throw error.response?.data || error.message;
+    }
+  },
+
+  disapproveEvent: async (id) => {
+    try {
+      const response = await api.put(`/events/${id}/disapprove`);
+      return response.data;
+    } catch (error) {
+      console.error('Error disapproving event:', error);
       throw error.response?.data || error.message;
     }
   },
