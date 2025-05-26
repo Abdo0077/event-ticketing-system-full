@@ -2,6 +2,8 @@ const userModel = require("../Model/UserSchema");
 const jwt = require("jsonwebtoken");
 const secretKey = "123456";
 const bcrypt = require("bcrypt");
+const Booking = require("../Model/BookingSchema");
+const Event = require("../Model/EventSchema");
 
 const userController = {
     register: async (req, res) => {
@@ -285,10 +287,11 @@ const userController = {
     //Get current user's bookings 
     getCurrentBookings: async (req, res) => {
         try {
-            const userId = req.user.id; // The user ID comes from the authenticated user (from JWT token or session)
+            console.log("here");
+            const userId = req.user.userId;
 
-            // Find the bookings related to the authenticated user
-            const bookings = await Booking.find({ user: userId });
+            // Find the bookings related to the authenticated user and populate event details
+            const bookings = await Booking.find({ user: userId }).populate('event');
 
             // If no bookings are found, send a message
             if (bookings.length === 0) {

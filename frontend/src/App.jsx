@@ -10,6 +10,9 @@ import Profile from "./pages/Profile";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import EventList from "./components/EventList";
 import EventDetails from "./components/EventDetails";
+import Booking from "./pages/Booking";
+import BookingSuccess from "./pages/BookingSuccess";
+import MyBookings from "./pages/MyBookings";
 
 function App() {
   return (
@@ -37,6 +40,11 @@ function App() {
             <Route path="profile" element={<Profile />} />
             {/* Event Details Route */}
             <Route path="events/:eventId" element={<EventDetails />} />
+            {/* Booking Routes */}
+            <Route path="booking/:eventId" element={<Booking />} />
+            <Route path="booking-success" element={<BookingSuccess />} />
+            {/* My Bookings Route */}
+            <Route path="my-bookings" element={<MyBookings />} />
 
             {/* Admin Routes */}
             <Route path="admin">
