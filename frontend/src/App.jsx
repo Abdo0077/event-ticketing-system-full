@@ -13,6 +13,9 @@ import EventDetails from "./components/EventDetails";
 import Booking from "./pages/Booking";
 import BookingSuccess from "./pages/BookingSuccess";
 import MyBookings from "./pages/MyBookings";
+import MyEvents from "./pages/MyEvents";
+import EditEvent from "./pages/EditEvent";
+import CreateEvent from "./pages/CreateEvent";
 
 function App() {
   return (
@@ -45,6 +48,36 @@ function App() {
             <Route path="booking-success" element={<BookingSuccess />} />
             {/* My Bookings Route */}
             <Route path="my-bookings" element={<MyBookings />} />
+
+            {/* My Events Route - Only for Organizers */}
+            <Route
+              path="my-events"
+              element={
+                <ProtectedRoute allowedRoles={["Organizer"]}>
+                  <MyEvents />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Create Event Route - Only for Organizers */}
+            <Route
+              path="create-event"
+              element={
+                <ProtectedRoute allowedRoles={["Organizer"]}>
+                  <CreateEvent />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Edit Event Route - Only for Organizers */}
+            <Route
+              path="edit-event/:eventId"
+              element={
+                <ProtectedRoute allowedRoles={["Organizer"]}>
+                  <EditEvent />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Admin Routes */}
             <Route path="admin">

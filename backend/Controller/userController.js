@@ -314,7 +314,8 @@ const userController = {
     //Get current user's events 
     getMyEvents: async (req, res) => {
         try {
-            const organizerId = req.user.id;
+            const organizerId = req.user.userId;
+            console.log("organizerId: ", organizerId);
 
             const events = await Event.find({ organizer: organizerId });
 

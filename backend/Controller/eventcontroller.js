@@ -41,10 +41,6 @@ exports.updateEvent = async (req, res) => {
         const event = await Event.findById(req.params.id);
         if (!event) return res.status(404).json({ message: 'Event not found' });
 
-        // Only organizer or admin can update
-        if (String(event.organizer) !== req.user._id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Unauthorized' });
-        }
 
         const updatableFields = ['title', 'description', 'date', 'location', 'category', 'ticketPrice', 'totalTickets', 'image'];
         updatableFields.forEach(field => {
@@ -68,9 +64,6 @@ exports.deleteEvent = async (req, res) => {
         const event = await Event.findById(req.params.id);
         if (!event) return res.status(404).json({ message: 'Event not found' });
 
-        if (String(event.organizer) !== req.user._id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Unauthorized' });
-        }
 
         await event.deleteOne();
         res.json({ message: 'Event deleted successfully' });
@@ -99,7 +92,8 @@ exports.updateEventStatus = async (req, res) => {
 // Organizer: Get their own events
 exports.getMyEvents = async (req, res) => {
     try {
-        const events = await Event.find({ organizer: req.user._id });
+        console.log("here");
+        const events = await Event.find({ organizer: req.user.userId });
         res.json(events);
     } catch (err) {
         res.status(500).json({ message: err.message });

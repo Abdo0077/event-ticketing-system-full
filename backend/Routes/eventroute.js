@@ -11,8 +11,8 @@ router.get('/:id', eventController.getEventById);
 router.post('/', authorizationMiddleware('Organizer'), eventController.createEvent);
 router.put('/:id', authorizationMiddleware(['Organizer', 'System Admin']), eventController.updateEvent);
 router.delete('/:id', authorizationMiddleware(['Organizer', 'System Admin']), eventController.deleteEvent);
-router.get('/organizer/my-events', authorizationMiddleware('Organizer'), eventController.getMyEvents);
-router.get('/organizer/analytics', authorizationMiddleware('Organizer'), eventController.getMyEventAnalytics);
+router.get('/users/my-events', authorizationMiddleware('Organizer'), eventController.getMyEvents);
+router.get('/users/analytics', authorizationMiddleware('Organizer'), eventController.getMyEventAnalytics);
 
 // Admin
 router.put('/:id/status', authorizationMiddleware('System Admin'), eventController.updateEventStatus);
