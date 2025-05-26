@@ -339,7 +339,7 @@ const userController = {
     //Get the analytics of the current user's events 
     getMyEventAnalytics: async (req, res) => {
         try {
-            const organizerId = req.user.id;
+            const organizerId = req.user.userId;
 
             // 1. Get all events created by this organizer
             const events = await Event.find({ organizer: organizerId });
