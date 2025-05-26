@@ -26,39 +26,42 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
 const login = async (credentials) => {
-  
     try {
-      const response =  await axios.post("http://localhost:3000/api/v1/login", credentials, {
+      const response = await axios.post("http://localhost:3000/api/v1/auth/login", credentials, {
         withCredentials: true,
       });
       if (response.data) {
         setUser(response.data.user);
-        
         return true;
       }
       throw new Error(response.message);
     } catch (err) {
       console.error(err);
+      throw err; // Re-throw the error so it can be handled by the login form
     }
   };
 
-  // Logout function in case we have logout endpoint
+  // Logout function
   const logout = async () => {
-    await axios.post(
-      "http://localhost:3000/api/v1/logout",
-      {},
-      {
-        withCredentials: true,
-      }
-    );
-    setUser(null);
-  ;
+    try {
+      await axios.post(
+        "http://localhost:3000/api/v1/auth/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      setUser(null);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   };
 
   if (loading) return <div>Loading...</div>;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout ,loading}}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

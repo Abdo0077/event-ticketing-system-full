@@ -8,6 +8,10 @@ import Unauthorized from "./pages/Unauthorized";
 import Layout from "./components/layout";
 import Events from "./pages/Events";
 import EventDetails from "./pages/EventDetails";
+import CreateEvent from "./pages/CreateEvent";
+import MyEventsPage from "./pages/MyEventsPage";
+import EventAnalytics from "./pages/EventAnalytics";
+import AdminEventsPage from "./pages/AdminEventsPage";
 
 function App() {
   return (
@@ -29,9 +33,46 @@ function App() {
           >
             {/* Index Route */}
             <Route index element={<Dashboard />} />
+            
             {/* Events Routes */}
             <Route path="events" element={<Events />} />
             <Route path="events/:id" element={<EventDetails />} />
+            
+            {/* Organizer Routes */}
+            <Route
+              path="events/create"
+              element={
+                <ProtectedRoute allowedRoles={["Organizer"]}>
+                  <CreateEvent />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="my-events"
+              element={
+                <ProtectedRoute allowedRoles={["Organizer"]}>
+                  <MyEventsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="analytics"
+              element={
+                <ProtectedRoute allowedRoles={["Organizer"]}>
+                  <EventAnalytics />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Admin Routes */}
+            <Route
+              path="manage-events"
+              element={
+                <ProtectedRoute allowedRoles={["System Admin"]}>
+                  <AdminEventsPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* Wildcard Route */}

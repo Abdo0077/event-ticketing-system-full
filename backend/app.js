@@ -28,7 +28,7 @@ app.use(
   );
 
 
-app.use("/api/v1", authRouter);
+app.use("/api/v1/auth", authRouter);
 app.use(authenticationMiddleware);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/events", eventRouter);

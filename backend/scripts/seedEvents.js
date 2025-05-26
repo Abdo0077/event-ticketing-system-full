@@ -20,7 +20,7 @@ const events = [
     totalTickets: 5000,
     remainingTickets: 4850,
     organizer: '682dd1714bb705fcf54e830c', // You'll need to replace this with a valid organizer ID
-    status: 'approved'
+    status: 'confirmed'
   },
   {
     title: 'Tech Conference 2024',
@@ -33,7 +33,7 @@ const events = [
     totalTickets: 1000,
     remainingTickets: 50,
     organizer: '682dd1714bb705fcf54e830c', // You'll need to replace this with a valid organizer ID
-    status: 'approved'
+    status: 'confirmed'
   },
   {
     title: 'Food & Wine Festival',
@@ -46,7 +46,7 @@ const events = [
     totalTickets: 2000,
     remainingTickets: 0,
     organizer: '682dd1714bb705fcf54e830c', // You'll need to replace this with a valid organizer ID
-    status: 'approved'
+    status: 'confirmed'
   },
   {
     title: 'Sports Championship Finals',
@@ -59,7 +59,7 @@ const events = [
     totalTickets: 15000,
     remainingTickets: 8000,
     organizer: '682dd1714bb705fcf54e830c', // You'll need to replace this with a valid organizer ID
-    status: 'approved'
+    status: 'confirmed'
   }
 ];
 
