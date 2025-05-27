@@ -24,11 +24,21 @@ api.interceptors.response.use(
 );
 
 export const eventService = {
+  // Public endpoints
   getAllEvents: () => api.get("/events"),
   getEventById: (id) => api.get(`/events/${id}`),
+  
+  // Organizer endpoints
   createEvent: (data) => api.post("/events", data),
   updateEvent: (id, data) => api.put(`/events/${id}`, data),
   deleteEvent: (id) => api.delete(`/events/${id}`),
+  getMyEvents: () => api.get("/events/users/my-events"),
+  getMyEventAnalytics: () => api.get("/events/users/analytics"),
+  
+  // Admin endpoints
+  getAllEventsAdmin: () => api.get("/events/all"),
+  approveEvent: (id) => api.put(`/events/${id}/approve`),
+  declineEvent: (id) => api.put(`/events/${id}/decline`),
 };
 
 export default api;

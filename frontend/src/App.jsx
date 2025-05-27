@@ -17,10 +17,11 @@ import MyEvents from "./pages/MyEvents";
 import EditEvent from "./pages/EditEvent";
 import CreateEvent from "./pages/CreateEvent";
 import EventAnalytics from "./pages/EventAnalytics";
+import AdminEventsPage from "./pages/AdminEventsPage";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <Routes>
           {/* Public Routes */}
@@ -97,6 +98,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["System Admin"]}>
                     <AdminUsersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="events"
+                element={
+                  <ProtectedRoute allowedRoles={["System Admin"]}>
+                    <AdminEventsPage />
                   </ProtectedRoute>
                 }
               />
